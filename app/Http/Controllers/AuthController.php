@@ -2,46 +2,35 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
+use App\Http\Requests\RegisterRequest;
+use App\Http\Requests\LoginRequest;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Validator;
 use Tymon\JWTAuth\Facades\JWTAuth;
-use Tymon\JWTAuth\Facades\JWTFactory;
 
+/**
+ * @OA\Post(
+ *     path="/api/register",
+ *     tags={"auth"},
+ *     summary="Register a new user",
+ *     @OA\RequestBody(
+ *         required=true,
+ *         @OA\JsonContent(ref="#/components/schemas/RegisterRequest")
+ *     ),
+ *     @OA\Response(
+ *         response=201,
+ *         description="User created successfully"
+ *     ),
+ *     @OA\Response(
+ *         response=400,
+ *         description="Bad request"
+ *     )
+ * )
+ */
 class AuthController extends Controller
 {
-    /**
-     * @OA\Post(
-     *     path="/api/register",
-     *     tags={"auth"},
-     *     summary="Register a new user",
-     *     @OA\RequestBody(
-     *         required=true,
-     *         @OA\JsonContent(ref="#/components/schemas/RegisterRequest")
-     *     ),
-     *     @OA\Response(
-     *         response=201,
-     *         description="User created successfully"
-     *     ),
-     *     @OA\Response(
-     *         response=400,
-     *         description="Bad request"
-     *     )
-     * )
-     */
-    public function register(Request $request)
+    public function register(RegisterRequest $request)
     {
-        $validator = Validator::make($request->all(), [
-            'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users',
-            'password' => 'required|string|min:6|confirmed',
-        ]);
-
-        if($validator->fails()){
-            return response()->json($validator->errors(), 400);
-        }
-
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
@@ -72,7 +61,7 @@ class AuthController extends Controller
      *     )
      * )
      */
-    public function login(Request $request)
+    public function login(LoginRequest $request)
     {
         $credentials = $request->only('email', 'password');
 
@@ -92,4 +81,3 @@ class AuthController extends Controller
         ]);
     }
 }
-
